@@ -24,6 +24,3 @@ ele(N) -> ele(N-1) + ele(N-2).
 feibo_list(N) -> feibo_list([], N).
 feibo_list(L, 0) -> L;
 feibo_list(L, N) -> feibo_list([ele(N)|L], N-1).
-
-
-
