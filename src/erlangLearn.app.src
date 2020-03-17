@@ -1,0 +1,19 @@
+%%%-------------------------------------------------------------------
+%%% @author 10990
+%%% @copyright (C) 2020, <COMPANY>
+%%% @doc
+%%%
+%%% @end
+%%% Created : 17. 三月 2020 15:09
+%%%-------------------------------------------------------------------
+{application, erlangLearn, [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+    kernel,
+    stdlib
+  ]},
+  {mod, {erlangLearn, []}},
+  {env, []}
+]}.
