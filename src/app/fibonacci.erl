@@ -10,8 +10,11 @@
 -author("10990").
 
 %% API
--export([fibonacci_list/1,ele/1]).
+-export([fibonacci_list/1,ele/1,test/0]).
 
+test()->
+  fibonacci_list(7),
+  fibonacci_list(6).
 %% 函数element主要为了计算斐波那契数列的第N个元素
 ele(1) -> 1;
 ele(2) -> 1;
