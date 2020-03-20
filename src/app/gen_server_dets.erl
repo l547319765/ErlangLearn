@@ -11,7 +11,7 @@
 -behavior(gen_server).
 -compile(export_all).
 %% API
--export([start/1,add_task/2,get_task/0,cencel_task/0,task_center/0,get_dets/0,center_init/1,add_to_list/3,pull_task/1]).
+-export([get_task_list/0,start/1,add_task/2,get_task/0,cencel_task/0,task_center/0,get_dets/0,center_init/1,add_to_list/3,pull_task/1]).
 %%回调函数
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -define(SERVER,?MODULE).
@@ -31,6 +31,7 @@
 %%        gen_server_dets:cencel_task().
 %%        gen_server_dets:get_task().
 %%        gen_server_dets:get_dets().
+%%        gen_server_dets:get_task_list().
 
 
 %%-------------gen_server----------API
@@ -89,6 +90,11 @@ handle_call({name_task,Name},_From,State) ->
 handle_call({get_dets},_From,State) ->
   TaskList = State#state.task_list,
   Reply = TaskList,
+  {reply, Reply, State};
+
+handle_call({get_task_list},_From,State) ->
+  TaskList = State#state.task_list,
+  Reply = get_list_of_task(TaskList),
   {reply, Reply, State}.
 
 handle_cast(_Msg,State)-> {noreply,State}.
@@ -120,6 +126,11 @@ cencel_task()->
 %%4.进程外获取dets的name
 get_dets()->
   gen_server:call(?MODULE,{get_dets}).
+
+%%4.查询当前任务队列
+get_task_list()->
+  gen_server:call(?MODULE,{get_task_list}).
+
 %%------------task_list------API
 %%初始化task_list
 center_init(Name) ->
@@ -169,7 +180,7 @@ pull_task(State)->
 task_center()->
   receive
     {start_task,State} ->
-      {Result,Name,State_new} = pull_task(State),
+      {Result,Name,_} = pull_task(State),
       case Result of
         false -> io:format("don't have task"),
           task_center();
@@ -187,3 +198,24 @@ task_center()->
           end
       end
   end.
+
+%%通过dets获取还没使用的list
+get_list_of_task(TaskList)->
+  [{index,_,Job_Index}] = dets:lookup(TaskList,index),
+  dets:traverse(TaskList,
+    fun(
+      {A, _, _}) ->
+        case A of
+          index ->void;
+          _ ->
+            if
+              A >=Job_Index ->
+                [{_,Name,Time}] = dets:lookup(TaskList,A),
+                io:format("job = ~p name = ~p~n",[Name,Time]);
+              true ->
+                void
+            end
+        end,
+      continue
+    end),
+  ok.
