@@ -87,7 +87,7 @@ handle_call({unname_task},_From,State) ->
 handle_call(stop,_From,State)-> io:format("good bye!~n"), {stop,normal,stopped,State};
 
 handle_call({name_task},_From,State) ->
-  {Result,Name,State_new} = pull_task(State),
+  {_,_,State_new} = pull_task(State),
 %%  io:format("new_running~p",[Name]),
   Name2 = State_new#state.task,
 %%  io:format("new_running~p",[Name2]),
@@ -159,7 +159,7 @@ pull_task(State)->
 task_center()->
   receive
     {start_task,State} ->
-      {Result,Name,State_new} = pull_task(State),
+      {Result,Name,_} = pull_task(State),
       case Result of
         false -> io:format("don't have task"),
           task_center();
