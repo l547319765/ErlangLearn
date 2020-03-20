@@ -10,9 +10,11 @@
 -author("10990").
 -behavior(gen_server).
 -compile(export_all).
-%% API
--export([get_task_list/0,start/1,add_task/2,get_task/0,cencel_task/0,task_center/0,get_dets/0,center_init/1,add_to_list/3,pull_task/1]).
-%%回调函数
+%% demoAPI
+-export([get_task_list/0,start/1,add_task/2,get_task/0,cencel_task/0,stop/0]).
+%% list管理API
+-export([task_center/0,get_dets/0,center_init/1,add_to_list/3,pull_task/1]).
+%%回调函数API
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -define(SERVER,?MODULE).
 %% state 保存任务的 名字，任务队列长度及任务队列.
@@ -87,6 +89,8 @@ handle_call({name_task,Name},_From,State) ->
   Reply = Name,
   {reply, Reply, State#state{task = Name,length = Len-1}};
 
+handle_call(stop,_From,State)-> io:format("good bye!~n"), {stop,normal,stopped,State};
+
 handle_call({get_dets},_From,State) ->
   TaskList = State#state.task_list,
   Reply = TaskList,
@@ -130,6 +134,10 @@ get_dets()->
 %%4.查询当前任务队列
 get_task_list()->
   gen_server:call(?MODULE,{get_task_list}).
+
+%%5.停止任务管理中心
+stop()->
+  gen_server:call(?MODULE,stop).
 
 %%------------task_list------API
 %%初始化task_list

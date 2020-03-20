@@ -10,11 +10,15 @@
 -author("10990").
 -behavior(gen_server).
 -compile(export_all).
-%% API
--export([start/1,add_task/2,get_task/0,cencel_task/0,task_center/0,add_to_list/3,pull_task/1]).
-%%回调函数
+
+%% demoAPI
+-export([start/1,add_task/2,get_task/0,cencel_task/0,stop/0]).
+%% list管理API
+-export([task_center/0,add_to_list/3,pull_task/1]).
+%%回调函数API
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -define(SERVER,?MODULE).
+
 %% state 保存任务的 名字，任务队列长度及任务队列.
 -record(state, {
   task_center ,      %%任务中心
@@ -80,6 +84,8 @@ handle_call({unname_task},_From,State) ->
   Test_Center ! {start_task,State2},
   {reply, Reply, State2};
 
+handle_call(stop,_From,State)-> io:format("good bye!~n"), {stop,normal,stopped,State};
+
 handle_call({name_task},_From,State) ->
   {Result,Name,State_new} = pull_task(State),
 %%  io:format("new_running~p",[Name]),
@@ -92,7 +98,9 @@ handle_cast(_Msg,State)-> {noreply,State}.
 
 handle_info(_Info,State)-> io:format("nothing"),{noreply,State}.
 
-terminate(_Reason,_State)->ok.
+terminate(_Reason,_State)->
+  io:format("exit"),
+  ok.
 
 code_change(_OldVsn,State,_Extra)->{ok,State}.
 
@@ -113,9 +121,13 @@ get_task()->
 %%3.取消正在执行任务
 cencel_task()->
   gen_server:call(?MODULE,{cencel_task}).
+
 %%4.停止任务管理中心
-%%stop()-> call(?MODULE,stop).
+stop()->
+  gen_server:call(?MODULE,stop).
+
 %%------------task_list------API
+
 %%初始化task_list
 %%center_init(State = #state{}) -> {State}.
 
