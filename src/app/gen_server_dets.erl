@@ -39,8 +39,14 @@
 %%-------------gen_server----------API
 init([Name]) ->
   TaskList =  center_init(task_list),
-  State =#state{task_center = Name,task_list = TaskList},
+  [{index,Data_Index,Job_Index}] = dets:lookup(TaskList,index),
+  Len = Data_Index - Job_Index,
+  State =#state{task_center = Name,length = Len,task_list = TaskList},
   register(Name,spawn(fun()-> task_center()end)),
+  if
+    Len > 0 -> Name ! {start_task,State};
+    true -> void
+  end,
   {ok,State}.
 
 handle_call({add_task,Name,Time},_From,State) ->
