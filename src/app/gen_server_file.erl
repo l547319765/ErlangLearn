@@ -87,7 +87,9 @@ handle_call({get_task},_From,State) ->
     end,
   {reply, Reply, State};
 
-handle_call(stop,_From,State)-> io:format("good bye!~n"), {stop,normal,stopped,State};
+handle_call(stop,_From,State)->
+  file:close(State#state.task_list),
+  io:format("good bye!~n"), {stop,normal,stopped,State};
 
 handle_call({unname_task},_From,State) ->
   State2 = State#state{task = none},
