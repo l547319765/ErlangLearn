@@ -50,7 +50,8 @@ init([Name]) ->
   TaskList =  center_tasklist_init(task_list),
   [{index,Data_Index,Job_Index}] = dets:lookup(TaskList,index),
   Len = Data_Index - Job_Index,
-  State =#state{task_center = Name,length = Len,task_list = TaskList},
+  FileSource =  file_source_init(),
+  State =#state{task_center = Name,length = Len,task_list = TaskList,file_source = FileSource},
   register(Name,spawn(fun()-> task_center()end)),
   if
   Len > 0 -> Name ! {start_task,State};
@@ -192,12 +193,6 @@ center_tasklist_init(Name) ->
       exit(eDetsOpen)
   end.
 
-%%初始化文件流
-file_source_init()->
-  File = "./job_finish_file.txt",
-  {ok,S}= file:open(File,write),
-  S.
-
 %%添加入task_list
 add_to_list(Name,Time,State)->
   Len  =  State#state.length,
@@ -270,6 +265,22 @@ task_center()->
           end
       end
   end.
+
+%%---------------------------API
+%%---------------------------API
+%%---------------------------API
+%%---------------------------API
+%%------------task_list------API
+%%---------------------------API
+%%---------------------------API
+%%---------------------------API
+%%---------------------------API
+
+%%初始化文件流
+file_source_init()->
+  File = "./job_finish_file.txt",
+  {ok,S}= file:open(File,write),
+  S.
 
 %%写入文件
 write_to_list(S,Name,Time,Reason) ->
